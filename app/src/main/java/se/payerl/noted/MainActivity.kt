@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.findNavController
 import com.google.android.material.navigation.NavigationView
 import se.payerl.noted.fragments.AboutFragment
+import se.payerl.noted.fragments.AboutFragmentDirections
 import se.payerl.noted.fragments.OverviewFragment
 import se.payerl.noted.fragments.OverviewFragmentDirections
 
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 "AboutFragment" -> navController.navigate(OverviewFragmentDirections.actionOverviewFragmentToAboutFragment())
                 else -> false
             }
-            else -> false
+            else -> navController.navigate(AboutFragmentDirections.actionAboutFragmentToOverviewFragment())
         }
     }
 }
