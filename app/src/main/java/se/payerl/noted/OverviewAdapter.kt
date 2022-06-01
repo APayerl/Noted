@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.drawable.DrawableWrapper
 import android.graphics.drawable.Icon
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,10 +17,14 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BitmapCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.os.ExecutorCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import se.payerl.noted.model.Note
+import se.payerl.noted.model.NoteType
+import se.payerl.noted.model.db.NoteEntity
+import se.payerl.noted.utils.DbHelp
 
 class OverviewAdapter(data: List<Note>, val context: Context): RecyclerView.Adapter<OverviewAdapter.OverviewVH>() {
     var _data: MutableList<Note> = data.toMutableList()
@@ -56,6 +61,13 @@ class OverviewAdapter(data: List<Note>, val context: Context): RecyclerView.Adap
         holder.itemName.text = holder.note.name
         holder.itemDescription.text = holder.note.type.name
         holder.itemDeteleBtn.setOnClickListener {
+            DbHelp.get()?.queryExecutor?.execute {
+                when(holder.note.type) {
+                    NoteType.LIST -> DbHelp.get()?.let { db ->
+                        db.noteDao().delete(holder.note.toEntity<NoteEntity>())
+                    }
+                }
+            }
             val index = _data.indexOf(holder.note)
             _data.remove(holder.note)
             notifyItemRemoved(index)
