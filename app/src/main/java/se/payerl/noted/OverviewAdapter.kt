@@ -1,33 +1,31 @@
 package se.payerl.noted
 
-import android.content.Context
-import android.graphics.BitmapFactory
-import android.graphics.drawable.DrawableWrapper
-import android.graphics.drawable.Icon
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.widget.DrawableUtils
 import androidx.appcompat.widget.LinearLayoutCompat
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.BitmapCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.widget.ImageViewCompat
-import androidx.core.widget.TextViewCompat
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import se.payerl.noted.model.Note
+import se.payerl.noted.model.NoteType
+import se.payerl.noted.model.db.AppDatabase
+import se.payerl.noted.model.db.Mapper
+import javax.inject.Inject
 
-class OverviewAdapter(data: List<Note>, val context: Context): RecyclerView.Adapter<OverviewAdapter.OverviewVH>() {
+class OverviewAdapter(data: List<Note>, val db: AppDatabase): RecyclerView.Adapter<OverviewAdapter.OverviewVH>() {
+    @Inject lateinit var _db: AppDatabase
+    val m: Mapper = Mapper()
+
     var _data: MutableList<Note> = data.toMutableList()
         private set(value) {
             field = value
         }
 
     inner class OverviewVH(itemView: View): RecyclerView.ViewHolder(itemView) {
+        val itemRow: ConstraintLayout
         val itemName: TextView
         val itemDescription: TextView
         val itemButtons: LinearLayoutCompat
@@ -35,6 +33,7 @@ class OverviewAdapter(data: List<Note>, val context: Context): RecyclerView.Adap
         lateinit var note: Note
 
         init {
+            itemRow = itemView.findViewById<ConstraintLayout>(R.id.item_row)
             itemName = itemView.findViewById<TextView>(R.id.item_name)
             itemDescription = itemView.findViewById<TextView>(R.id.item_description)
             itemButtons = itemView.findViewById<LinearLayoutCompat>(R.id.item_buttons)
@@ -56,15 +55,32 @@ class OverviewAdapter(data: List<Note>, val context: Context): RecyclerView.Adap
         holder.itemName.text = holder.note.name
         holder.itemDescription.text = holder.note.type.name
         holder.itemDeteleBtn.setOnClickListener {
+            db.queryExecutor.execute {
+                when(holder.note.type) {
+                    NoteType.LIST -> db.noteDao().delete(m.noteToNoteEntity(holder.note))
+                }
+            }
             val index = _data.indexOf(holder.note)
             _data.remove(holder.note)
             notifyItemRemoved(index)
+        }
+        holder.itemView.setOnClickListener {
+            Log.w("click", "Clicked on THE view!")
         }
     }
 
     fun addData(note: Note): OverviewAdapter {
         _data.add(note)
+        persistNote(note)
         notifyItemInserted(_data.size - 1)
         return this
+    }
+
+    private fun persistNote(note: Note) {
+        db.queryExecutor.execute {
+            if(db.noteDao().hasUUID(note.uuid)) {
+                db.noteDao().update(m.noteToNoteEntity(note))
+            } else db.noteDao().insertAll(m.noteToNoteEntity(note))
+        }
     }
 }

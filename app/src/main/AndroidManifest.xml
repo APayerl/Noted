@@ -4,6 +4,7 @@
     package="se.payerl.noted">
 
     <application
+        android:name=".application.DIApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"

@@ -13,11 +13,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.findNavController
 import com.google.android.material.navigation.NavigationView
+import dagger.hilt.android.AndroidEntryPoint
 import se.payerl.noted.fragments.AboutFragment
 import se.payerl.noted.fragments.AboutFragmentDirections
 import se.payerl.noted.fragments.OverviewFragment
 import se.payerl.noted.fragments.OverviewFragmentDirections
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     lateinit var abdt: ActionBarDrawerToggle
 
@@ -53,10 +55,6 @@ class MainActivity : AppCompatActivity() {
     override fun onPostCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onPostCreate(savedInstanceState, persistentState)
         abdt.syncState()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return super.onOptionsItemSelected(item)
     }
 
     private fun navigate(dst: String) {
