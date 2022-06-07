@@ -1,7 +1,5 @@
 package se.payerl.noted.model
 
-import se.payerl.noted.model.db.AppDatabase
-import se.payerl.noted.model.db.NoteRowTextEntity
 import java.time.LocalDateTime
 import java.util.*
 

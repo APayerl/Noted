@@ -13,7 +13,7 @@ class Note constructor(
     override val type: NoteType = NoteType.LIST,
     override val createdAt: LocalDateTime = LocalDateTime.now()
 ) : NoteBase {
-    @Inject lateinit var mapper: Mapper
+    val m: Mapper = Mapper()
     @Inject lateinit var db: AppDatabase
 
     var name: String = ""
@@ -22,8 +22,8 @@ class Note constructor(
             Log.i("Note", "Note ${element.uuid} added.")
 
             when (type) {
-                NoteType.ROW_TEXT -> db.rowTextDao().insertAll(mapper.noteRowTextToNoteRowTextEntity(element as NoteRowText))
-                else -> db.rowAmountDao().insertAll(mapper.noteRowAmountToNoteRowAmountEntity(element as NoteRowAmount))
+                NoteType.ROW_TEXT -> db.rowTextDao().insertAll(m.noteRowTextToNoteRowTextEntity(element as NoteRowText))
+                else -> db.rowAmountDao().insertAll(m.noteRowAmountToNoteRowAmountEntity(element as NoteRowAmount))
             }
         }
     })
