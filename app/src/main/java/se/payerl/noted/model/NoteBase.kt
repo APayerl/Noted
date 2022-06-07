@@ -7,6 +7,4 @@ interface NoteBase {
     val uuid: String
     val type: NoteType
     val createdAt: LocalDateTime
-
-    fun <T> toEntity(): Entity
 }

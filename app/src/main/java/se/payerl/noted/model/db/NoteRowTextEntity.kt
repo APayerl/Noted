@@ -20,7 +20,7 @@ class NoteRowTextEntity: se.payerl.noted.model.db.Entity {
 
     @PrimaryKey
     @ColumnInfo(name = "uuid")
-    var uuid: String = UUID.randomUUID().toString()
+    var uuid: String = ""
 
     @ColumnInfo(name = "type")
     var type: NoteType = NoteType.ROW_TEXT
