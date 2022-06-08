@@ -28,7 +28,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        val fragView = findViewById<FragmentContainerView>(R.id.nav_host_fragment)
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val navView = drawer.findViewById<NavigationView>(R.id.nav_view)
 
@@ -39,13 +38,9 @@ class MainActivity : AppCompatActivity() {
         drawer.addDrawerListener(abdt)
 
         navView.setNavigationItemSelectedListener {
-            Log.e("selected", "${it.title}")
-            val frag = fragView.getFragment<Fragment>()
-            Log.w("fragment", "${frag is OverviewFragment}")
-            Log.w("fragment", "${frag is AboutFragment}")
             when(it.itemId) {
-                R.id.drawer_list_overview -> { navigate("OverviewFragment") }
-                R.id.drawer_about -> navigate("AboutFragment")
+                R.id.drawer_list_overview -> findNavController(R.id.nav_host_fragment).navigate(NavGraphDirections.globalToAboutFragment())
+                R.id.drawer_about -> findNavController(R.id.nav_host_fragment).navigate(NavGraphDirections.globalToOverviewFragment())
             }
             drawer.close()
             true
@@ -55,16 +50,5 @@ class MainActivity : AppCompatActivity() {
     override fun onPostCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onPostCreate(savedInstanceState, persistentState)
         abdt.syncState()
-    }
-
-    private fun navigate(dst: String) {
-        val navController = findNavController(R.id.nav_host_fragment)
-        when(navController.currentDestination!!.displayName) {
-            "se.payerl.noted:id/overviewFragment" -> when(dst) {
-                "AboutFragment" -> navController.navigate(OverviewFragmentDirections.actionOverviewFragmentToAboutFragment())
-                else -> false
-            }
-            else -> navController.navigate(AboutFragmentDirections.actionAboutFragmentToOverviewFragment())
-        }
     }
 }

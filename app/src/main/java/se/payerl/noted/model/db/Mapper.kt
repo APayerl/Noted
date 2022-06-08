@@ -3,6 +3,9 @@ package se.payerl.noted.model.db
 import se.payerl.noted.model.Note
 import se.payerl.noted.model.NoteRowAmount
 import se.payerl.noted.model.NoteRowText
+import se.payerl.noted.model.NoteType
+import java.time.LocalDateTime
+import java.util.*
 
 class Mapper {
     fun noteEntityToNote(noteEntity: NoteEntity): Note {
@@ -25,7 +28,7 @@ class Mapper {
         val entity = NoteRowTextEntity()
         with(row) {
             entity.done = done
-            entity.owner = owner
+            entity.owner = parent
             entity.content = content
             entity.uuid = uuid
             entity.createdAt = createdAt
@@ -38,10 +41,32 @@ class Mapper {
         with(row) {
             entity.amount = amount
             entity.amountDone = amountDone
+            entity.owner = parent
             entity.content = content
             entity.uuid = uuid
             entity.createdAt = createdAt
         }
         return entity
+    }
+
+    fun noteRowTextEntityToNoteRowText(row: NoteRowTextEntity): NoteRowText {
+        return NoteRowText(row.owner).apply {
+            content = row.content
+            done = row.done
+            uuid = row.uuid
+            type = row.type
+            createdAt = row.createdAt
+        }
+    }
+
+    fun noteRowAmountEntityToNoteRowAmount(row: NoteRowAmountEntity): NoteRowAmount {
+        return NoteRowAmount(row.owner).apply {
+            content = row.content
+            amountDone = row.amountDone
+            amount = row.amount
+            uuid = row.uuid
+            type = row.type
+            createdAt = row.createdAt
+        }
     }
 }

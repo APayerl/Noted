@@ -2,7 +2,6 @@ package se.payerl.noted.model.db
 
 import androidx.room.*
 import androidx.room.Dao
-import se.payerl.noted.model.NoteRowText
 
 @Dao
 interface NoteRowTextDAO: se.payerl.noted.model.db.Dao<NoteRowTextEntity> {
@@ -14,6 +13,9 @@ interface NoteRowTextDAO: se.payerl.noted.model.db.Dao<NoteRowTextEntity> {
 
     @Query("SELECT * FROM row_text WHERE uuid LIKE :uuid LIMIT 1")
     override fun findByUUID(uuid: String): NoteRowTextEntity
+
+    @Query("SELECT * FROM row_text WHERE owner = :uuid")
+    override fun findByParent(uuid: String): List<NoteRowTextEntity>
 
     @Update
     override fun update(item: NoteRowTextEntity)

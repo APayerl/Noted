@@ -4,9 +4,9 @@ import java.time.LocalDateTime
 import java.util.*
 
 class NoteRowText(
-    val owner: String,
-    var content: String = "",
-    var done: Boolean = false) : NoteBase {
+    override val parent: String,
+    override var content: String = "",
+    var done: Boolean = false) : NoteRow {
     override var uuid: String = UUID.randomUUID().toString()
     override var type: NoteType = NoteType.ROW_TEXT
     override var createdAt: LocalDateTime = LocalDateTime.now()
