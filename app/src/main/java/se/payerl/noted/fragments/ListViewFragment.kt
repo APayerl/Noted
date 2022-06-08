@@ -34,6 +34,7 @@ class ListViewFragment : Fragment() {
                         db.rowTextDao().findByParent(uuid).map { mList.add(m.noteRowTextEntityToNoteRowText(it)) }
                         db.rowAmountDao().findByParent(uuid).map { mList.add(m.noteRowAmountEntityToNoteRowAmount(it)) }
                         mList.sortBy(NoteRow::createdAt)
+                        //TODO Use list in adapter!
                     }
                     findViewById<TextView>(R.id.child)?.apply {
                         text = uuid
