@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/general_list_layout"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:id="@+id/general_list_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/general_list_sublayout"/>
+
+    <LinearLayout
+        android:id="@+id/general_list_sublayout"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/general_list_icons"
+        app:layout_constraintStart_toEndOf="@id/general_list_checkbox"
+        android:orientation="horizontal"
+        android:layout_height="match_parent"
+        android:layout_width="0dp" />
+
+    <LinearLayout
+        android:id="@+id/general_list_icons"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/item_delete_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/ic_delete_black_24"
+            android:contentDescription="delete button"
+            app:layout_constraintDimensionRatio="1:1" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

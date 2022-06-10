@@ -22,4 +22,7 @@ class NoteEntity: se.payerl.noted.model.db.Entity {
 
     @ColumnInfo(name = "created_at")
     var createdAt: LocalDateTime = LocalDateTime.now()
+
+    @ColumnInfo(name = "parent")
+    var parent: String? = null
 }

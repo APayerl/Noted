@@ -1,4 +1,4 @@
-package se.payerl.noted
+package se.payerl.noted.adapters
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,15 +8,16 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.RecyclerView
+import se.payerl.noted.R
 import se.payerl.noted.model.Note
 import se.payerl.noted.model.NoteType
 import se.payerl.noted.model.db.AppDatabase
 import se.payerl.noted.model.db.Mapper
 import javax.inject.Inject
 
-class OverviewAdapter(data: List<Note>, val db: AppDatabase): RecyclerView.Adapter<OverviewAdapter.OverviewVH>() {
-    @Inject lateinit var _db: AppDatabase
+class OverviewAdapter(data: List<Note>, val db: AppDatabase, val listener: (note: Note) -> Unit): RecyclerView.Adapter<OverviewAdapter.OverviewVH>() {
     val m: Mapper = Mapper()
 
     var _data: MutableList<Note> = data.toMutableList()
@@ -34,6 +35,10 @@ class OverviewAdapter(data: List<Note>, val db: AppDatabase): RecyclerView.Adapt
 
         init {
             itemRow = itemView.findViewById<ConstraintLayout>(R.id.item_row)
+            itemRow.setOnClickListener {
+                Log.w("click", "row")
+                listener(note)
+            }
             itemName = itemView.findViewById<TextView>(R.id.item_name)
             itemDescription = itemView.findViewById<TextView>(R.id.item_description)
             itemButtons = itemView.findViewById<LinearLayoutCompat>(R.id.item_buttons)
@@ -63,9 +68,6 @@ class OverviewAdapter(data: List<Note>, val db: AppDatabase): RecyclerView.Adapt
             val index = _data.indexOf(holder.note)
             _data.remove(holder.note)
             notifyItemRemoved(index)
-        }
-        holder.itemView.setOnClickListener {
-            Log.w("click", "Clicked on THE view!")
         }
     }
 

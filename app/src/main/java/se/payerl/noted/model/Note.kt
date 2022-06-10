@@ -8,10 +8,11 @@ import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 
-class Note constructor(
+class Note(
     override val uuid: String = UUID.randomUUID().toString(),
     override val type: NoteType = NoteType.LIST,
-    override val createdAt: LocalDateTime = LocalDateTime.now()
+    override val createdAt: LocalDateTime = LocalDateTime.now(),
+    override var parent: String? = null
 ) : NoteBase {
     val m: Mapper = Mapper()
     @Inject lateinit var db: AppDatabase

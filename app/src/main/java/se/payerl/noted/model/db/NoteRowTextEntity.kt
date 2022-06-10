@@ -9,8 +9,8 @@ import java.util.*
 
 @Entity(tableName = "row_text")
 class NoteRowTextEntity: se.payerl.noted.model.db.Entity {
-    @ColumnInfo(name = "owner")
-    var owner: String? = null
+    @ColumnInfo(name = "parent")
+    var parent: String? = null
 
     @ColumnInfo(name = "content")
     var content: String = ""
