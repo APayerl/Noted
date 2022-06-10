@@ -7,4 +7,9 @@ interface NoteBase : Serializable {
     val uuid: String
     val type: NoteType
     val createdAt: LocalDateTime
+    var parent: String?
+
+    fun hasParent(): Boolean {
+        return parent == null
+    }
 }

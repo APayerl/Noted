@@ -58,9 +58,6 @@ class OverviewFragment : Fragment() {
                 }
                 adapter = listAdapter
             }
-            setOnClickListener {
-                Log.w("click", "out row")
-            }
         }
         return view
     }

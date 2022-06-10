@@ -18,9 +18,9 @@ class ListenableList<T>(private val list: MutableList<T> = mutableListOf(), priv
 
 interface AddListener<T> {
     fun preAdd(list: List<T>) {}
-    fun postAdd(list: List<T>) {}
     fun add(element: T) {}
+    fun postAdd(list: List<T>) {}
     fun preRemove(list: List<T>) {}
-    fun postRemove(list: List<T>) {}
     fun remove(element: T) {}
+    fun postRemove(list: List<T>) {}
 }

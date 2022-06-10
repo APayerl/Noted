@@ -14,7 +14,7 @@ interface NoteRowTextDAO: se.payerl.noted.model.db.Dao<NoteRowTextEntity> {
     @Query("SELECT * FROM row_text WHERE uuid LIKE :uuid LIMIT 1")
     override fun findByUUID(uuid: String): NoteRowTextEntity
 
-    @Query("SELECT * FROM row_text WHERE owner = :uuid")
+    @Query("SELECT * FROM row_text WHERE parent = :uuid")
     override fun findByParent(uuid: String): List<NoteRowTextEntity>
 
     @Update
