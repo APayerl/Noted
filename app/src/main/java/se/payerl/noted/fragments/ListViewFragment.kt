@@ -59,7 +59,6 @@ class ListViewFragment : Fragment() {
                 glAdapter.populate(db.rowTextDao().findByParent(uuid).map { m.noteRowTextEntityToNoteRowText(it) })
                 glAdapter.populate(db.rowAmountDao().findByParent(uuid).map { m.noteRowAmountEntityToNoteRowAmount(it) })
                 glAdapter.populate(db.noteDao().findByParent(uuid).map { m.noteEntityToNote(it) })
-//                list.sortBy(NoteBase::createdAt)
             }
             rootView.findViewById<TextView>(R.id.child)?.apply {
                 text = uuid

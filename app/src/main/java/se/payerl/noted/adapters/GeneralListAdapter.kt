@@ -43,7 +43,6 @@ class GeneralListAdapter(_d: List<NoteBase>, val db: AppDatabase, val listener: 
         _data.addAll(x, content)
         _data.sortBy(NoteBase::createdAt)
         notifyDataSetChanged()
-//        notifyItemRangeInserted(x, content.size)
     }
 
     fun addToList(content: NoteBase) {

@@ -33,22 +33,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/item_name" />
-
-<!--    <androidx.appcompat.widget.LinearLayoutCompat-->
-<!--        android:id="@+id/item_buttons"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:padding="5sp"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent">-->
-
-<!--        <ImageView-->
-<!--            android:id="@+id/item_delete_btn"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:background="@drawable/ic_delete_black_24"-->
-<!--            android:contentDescription="delete button"-->
-<!--            app:layout_constraintDimensionRatio="1:1" />-->
-<!--    </androidx.appcompat.widget.LinearLayoutCompat>-->
 </androidx.constraintlayout.widget.ConstraintLayout>
