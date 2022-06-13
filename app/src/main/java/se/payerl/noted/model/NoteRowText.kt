@@ -10,4 +10,8 @@ class NoteRowText(
     override var uuid: String = UUID.randomUUID().toString()
     override var type: NoteType = NoteType.ROW_TEXT
     override var createdAt: LocalDateTime = LocalDateTime.now()
+
+    override fun hasParent(): Boolean {
+        return parent != null
+    }
 }

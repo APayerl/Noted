@@ -1,5 +1,6 @@
 package se.payerl.noted.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +15,7 @@ import java.time.ZoneOffset
 class GeneralListAdapter(_d: List<NoteBase>, val db: AppDatabase, val listener: (note: NoteBase) -> Unit) : RecyclerView.Adapter<GeneralListAdapter.GeneralVH>() {
     private val _data: MutableList<NoteBase> = _d.toMutableList()
 
-    inner class GeneralVH(val itemView: View, val parent: ViewGroup): RecyclerView.ViewHolder(itemView) {
+    inner class GeneralVH(private val itemView: View, val parent: ViewGroup): RecyclerView.ViewHolder(itemView) {
         lateinit var data: NoteBase
         private lateinit var logic: ViewLogic
         val checkbox: CheckBox = itemView.findViewById<CheckBox>(R.id.general_list_checkbox)
@@ -24,7 +25,9 @@ class GeneralListAdapter(_d: List<NoteBase>, val db: AppDatabase, val listener: 
             data = _d
 
             trash.setOnClickListener {
-                parent.removeView(itemView)
+                val index = _data.indexOf(data)
+                _data.remove(data)
+                notifyItemRemoved(index)
             }
 
             logic = when(data.type) {

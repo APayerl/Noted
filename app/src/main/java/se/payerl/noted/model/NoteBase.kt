@@ -9,7 +9,5 @@ interface NoteBase : Serializable {
     val createdAt: LocalDateTime
     var parent: String?
 
-    fun hasParent(): Boolean {
-        return parent == null
-    }
+    fun hasParent(): Boolean
 }
