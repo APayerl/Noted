@@ -26,6 +26,7 @@ class RowAmountVL(itemView: View, src: GeneralListAdapter.GeneralVH, gla: Genera
                         fromUser: Boolean
                     ) {
                         Log.w("SeekBar", "${dataObj.uuid}: $progress")
+                        src.checkbox.isChecked = progress == max
                     }
 
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {

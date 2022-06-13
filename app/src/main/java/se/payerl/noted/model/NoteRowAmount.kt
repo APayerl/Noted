@@ -12,4 +12,8 @@ class NoteRowAmount(
     override var uuid: String = UUID.randomUUID().toString()
     override var type: NoteType = NoteType.ROW_AMOUNT
     override var createdAt: LocalDateTime = LocalDateTime.now()
+
+    override fun hasParent(): Boolean {
+        return parent != null
+    }
 }

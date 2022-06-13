@@ -1,5 +1,6 @@
 package se.payerl.noted.fragments
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -14,13 +15,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import se.payerl.noted.R
 import se.payerl.noted.adapters.GeneralListAdapter
-import se.payerl.noted.model.Note
-import se.payerl.noted.model.NoteBase
-import se.payerl.noted.model.NoteRowText
+import se.payerl.noted.model.*
 import se.payerl.noted.model.db.AppDatabase
 import se.payerl.noted.model.db.Mapper
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import se.payerl.noted.utils.RowAddDialog
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -51,14 +49,29 @@ class ListViewFragment : Fragment() {
         }
         requireArguments().getString("uuid")?.let { uuid ->
             fab = rootView.findViewById<FloatingActionButton>(R.id.floatingActionButton).apply {
+                val defaultType: NoteType = NoteType.valueOf(requireContext().getSharedPreferences("", Context.MODE_PRIVATE).getString("default_add_action", NoteType.ROW_TEXT.toString())!!)
                 setOnClickListener {
-                    glAdapter.addToList(NoteRowText(uuid).apply { content = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli().toString() })
+                    glAdapter.addToList(GeneralListAdapter.getRow(defaultType, uuid))
+                }
+                setOnLongClickListener {
+                    RowAddDialog.get(this@ListViewFragment.requireContext(),
+                        "What row type?",
+                        NoteType.values().map{it.toString()}.toTypedArray(),
+                        NoteType.values().indexOf(defaultType)) { chosen ->
+                        glAdapter.addToList(GeneralListAdapter.getRow(NoteType.values()[chosen], uuid))
+                    }
+                    true
                 }
             }
             db.queryExecutor.execute {
-                glAdapter.populate(db.rowTextDao().findByParent(uuid).map { m.noteRowTextEntityToNoteRowText(it) })
-                glAdapter.populate(db.rowAmountDao().findByParent(uuid).map { m.noteRowAmountEntityToNoteRowAmount(it) })
-                glAdapter.populate(db.noteDao().findByParent(uuid).map { m.noteEntityToNote(it) })
+                val list = listOf(
+                    db.rowTextDao().findByParent(uuid).map { m.noteRowTextEntityToNoteRowText(it) },
+                    db.rowAmountDao().findByParent(uuid).map { m.noteRowAmountEntityToNoteRowAmount(it) },
+                    db.noteDao().findByParent(uuid).map { m.noteEntityToNote(it) }).flatten()
+
+                this@ListViewFragment.requireActivity().runOnUiThread {
+                    glAdapter.populate(list)
+                }
             }
             rootView.findViewById<TextView>(R.id.child)?.apply {
                 text = uuid

@@ -28,4 +28,8 @@ class Note(
             }
         }
     })
+
+    override fun hasParent(): Boolean {
+        return parent != null
+    }
 }
