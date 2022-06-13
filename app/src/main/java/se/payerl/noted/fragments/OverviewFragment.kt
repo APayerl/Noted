@@ -61,30 +61,4 @@ class OverviewFragment : Fragment() {
         }
         return view
     }
-
-//    private fun alert() {
-//        context?.let { context ->
-//            val alertDialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
-//
-//            alertDialogBuilder.setTitle("What copy type?")
-//            alertDialogBuilder.setSingleChoiceItems(arrayOf<String>("Reference", "Value"), 1) { _,_ -> false }
-//
-//            alertDialogBuilder.setNegativeButton("Cancel") { dialog, which ->
-//                Toast.makeText(context, "Cancelled", Toast.LENGTH_SHORT).show()
-//                true
-//            }
-//            alertDialogBuilder.setNeutralButton("") { _,_ ->
-//                //TODO Explain reference vs value
-//                true }
-//            alertDialogBuilder.setNeutralButtonIcon(ResourcesCompat.getDrawable(resources, R.drawable.ic_help_outline_black_24, null))
-//            alertDialogBuilder.setPositiveButton("Select") { dialog, which ->
-//                (dialog as AlertDialog).listView.checkedItemPosition.let { pos ->
-//                    Toast.makeText(context, "Selected: $pos", Toast.LENGTH_SHORT).show()
-//                }
-//                true
-//            }
-//
-//            alertDialogBuilder.create().show()
-//        }
-//    }
 }
