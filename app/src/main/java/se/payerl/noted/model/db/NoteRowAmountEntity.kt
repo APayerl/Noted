@@ -15,8 +15,8 @@ class NoteRowAmountEntity: se.payerl.noted.model.db.Entity {
     @ColumnInfo(name = "content")
     var content: String = ""
 
-    @ColumnInfo(name = "amount_done")
-    var amountDone: Int = 0
+    @ColumnInfo(name = "amount_when_finished")
+    var amountWhenFinished: Int = 0
 
     @ColumnInfo(name = "amount")
     var amount: Int = 1

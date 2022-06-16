@@ -1,11 +1,6 @@
 package se.payerl.noted.model.db
 
-import se.payerl.noted.model.Note
-import se.payerl.noted.model.NoteRowAmount
-import se.payerl.noted.model.NoteRowText
-import se.payerl.noted.model.NoteType
-import java.time.LocalDateTime
-import java.util.*
+import se.payerl.noted.model.*
 
 class Mapper {
     fun noteEntityToNote(noteEntity: NoteEntity): Note {
@@ -36,7 +31,7 @@ class Mapper {
     fun noteRowAmountToNoteRowAmountEntity(row: NoteRowAmount): NoteRowAmountEntity {
         return NoteRowAmountEntity().apply {
             amount = row.amount
-            amountDone = row.amountDone
+            amountWhenFinished = row.amountWhenFinished.value!!
             parent = row.parent
             content = row.content
             uuid = row.uuid
@@ -57,7 +52,7 @@ class Mapper {
     fun noteRowAmountEntityToNoteRowAmount(row: NoteRowAmountEntity): NoteRowAmount {
         return NoteRowAmount(row.parent).apply {
             content = row.content
-            amountDone = row.amountDone
+            amountWhenFinished.postValue(row.amountWhenFinished)
             amount = row.amount
             uuid = row.uuid
             type = row.type
