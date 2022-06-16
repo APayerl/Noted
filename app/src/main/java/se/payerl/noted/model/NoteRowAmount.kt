@@ -14,9 +14,11 @@ class NoteRowAmount(
     override var uuid: String = UUID.randomUUID().toString()
     override var type: NoteType = NoteType.ROW_AMOUNT
     override var createdAt: LocalDateTime = LocalDateTime.now()
-    val amountWhenFinished: MutableLiveData<Int>
 
-    init {
-        amountWhenFinished = MutableLiveData<Int>(_amountWhenFinished)
+    override fun isDone(): Boolean {
+        return amountWhenFinished.value == amount
     }
+
+    val amountWhenFinished: MutableLiveData<Int> = MutableLiveData<Int>(_amountWhenFinished)
+
 }

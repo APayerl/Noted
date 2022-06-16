@@ -8,4 +8,6 @@ interface NoteBase : Serializable {
     val type: NoteType
     val createdAt: LocalDateTime
     var parent: String?
+
+    fun isDone(): Boolean
 }

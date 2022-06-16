@@ -28,4 +28,8 @@ class Note(
             }
         }
     })
+
+    override fun isDone(): Boolean {
+        return content.filter { !it.isDone() }.size == 0
+    }
 }
