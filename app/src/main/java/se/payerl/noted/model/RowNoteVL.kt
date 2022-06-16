@@ -6,13 +6,14 @@ import android.widget.TextView
 import se.payerl.noted.R
 import se.payerl.noted.adapters.GeneralListAdapter
 
-class RowNoteVL(itemView: View, src: GeneralListAdapter.GeneralVH, gla: GeneralListAdapter): ViewLogic(itemView, src, gla) {
+class RowNoteVL(itemView: View, src: GeneralListAdapter.GeneralVH, val shortListener: (note: NoteBase) -> Unit, val longListener: (note: NoteBase) -> Unit): ViewLogic(itemView) {
     private var name: TextView
     private var description: TextView
+    private val content: Note
 
     init {
         LayoutInflater.from(src.parent.context).inflate(R.layout.list_item_note, src.parent, false).let { sub ->
-            val content: Note = src.data as Note
+            content = src.data as Note
             name = sub.findViewById<TextView>(R.id.item_name).apply {
                 text = content.name
             }
@@ -21,5 +22,15 @@ class RowNoteVL(itemView: View, src: GeneralListAdapter.GeneralVH, gla: GeneralL
             }
             subLayoutFrame.addView(sub)
         }
+    }
+
+    override fun onFastClick(v: View): Boolean {
+        shortListener(content)
+        return true
+    }
+
+    override fun onLongClick(v: View): Boolean {
+        longListener(content)
+        return true
     }
 }

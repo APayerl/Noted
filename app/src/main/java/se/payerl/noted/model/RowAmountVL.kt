@@ -1,5 +1,7 @@
 package se.payerl.noted.model
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -8,17 +10,25 @@ import android.widget.TextView
 import se.payerl.noted.R
 import se.payerl.noted.adapters.GeneralListAdapter
 
-class RowAmountVL(itemView: View, src: GeneralListAdapter.GeneralVH, gla: GeneralListAdapter): ViewLogic(itemView, src, gla) {
+class RowAmountVL(itemView: View, src: GeneralListAdapter.GeneralVH, val shortListener: (note: NoteBase) -> Unit, val longListener: (note: NoteBase) -> Unit): ViewLogic(itemView) {
     private val seekbar: SeekBar
     private val content: TextView
+    private val dataObj: NoteRowAmount
+    val sp: SharedPreferences = src.parent.context.getSharedPreferences("", Context.MODE_PRIVATE)
 
     init {
-        val dataObj = src.data as NoteRowAmount
+        dataObj = src.data as NoteRowAmount
         LayoutInflater.from(src.parent.context).inflate(R.layout.list_item_row_amount, src.parent, false).let { sub ->
             seekbar = sub.findViewById<SeekBar>(R.id.list_item_row_amount_seekbar).apply {
-                max = dataObj.amount
-                min = 0
-                progress = dataObj.amountDone
+                src.checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
+                    progress = if(isChecked) max else min
+                }
+                dataObj.amountWhenFinished.observeForever {
+                    max = it
+                }
+                min = sp.getInt("number_picker_min_value", 0)
+
+                progress = dataObj.amount
                 setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(
                         seekBar: SeekBar?,
@@ -41,5 +51,15 @@ class RowAmountVL(itemView: View, src: GeneralListAdapter.GeneralVH, gla: Genera
             }
             subLayoutFrame.addView(sub)
         }
+    }
+
+    override fun onFastClick(v: View): Boolean {
+        shortListener(dataObj)
+        return true
+    }
+
+    override fun onLongClick(v: View): Boolean {
+        longListener(dataObj)
+        return true
     }
 }

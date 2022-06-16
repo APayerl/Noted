@@ -1,20 +1,27 @@
 package se.payerl.noted.model
 
+import android.util.Log
+import android.view.Menu
 import android.view.View
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import se.payerl.noted.R
 import se.payerl.noted.adapters.GeneralListAdapter
 
-abstract class ViewLogic(itemView: View, src: GeneralListAdapter.GeneralVH, gla: GeneralListAdapter) {
-    var subLayoutFrame: LinearLayout
-    var itemRow: ConstraintLayout
+abstract class ViewLogic(private val itemView: View) {
+    var subLayoutFrame: LinearLayout = itemView.findViewById<LinearLayout>(R.id.general_list_sublayout)
+    var itemRow: ConstraintLayout = itemView.findViewById<ConstraintLayout>(R.id.general_list_layout)
 
     init {
-        subLayoutFrame = itemView.findViewById<LinearLayout>(R.id.general_list_sublayout)
-        itemRow = itemView.findViewById<ConstraintLayout>(R.id.general_list_layout)
         itemRow.setOnClickListener {
-            gla.listener(src.data)
+            onFastClick(it)
+        }
+        itemRow.setOnLongClickListener {
+            onLongClick(it)
+            true
         }
     }
+
+    abstract fun onFastClick(v: View): Boolean
+    abstract fun onLongClick(v: View): Boolean
 }

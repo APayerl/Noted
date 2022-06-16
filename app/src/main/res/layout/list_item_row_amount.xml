@@ -18,7 +18,7 @@
     <SeekBar
         android:id="@+id/list_item_row_amount_seekbar"
         android:layout_width="wrap_content"
-        android:minWidth="25dp"
+        android:minWidth="80dp"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
