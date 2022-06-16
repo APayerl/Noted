@@ -14,7 +14,7 @@ class Note(
     override val createdAt: LocalDateTime = LocalDateTime.now(),
     override var parent: String? = null
 ) : NoteBase {
-    val m: Mapper = Mapper()
+    private val m: Mapper = Mapper()
     @Inject lateinit var db: AppDatabase
 
     var name: String = ""
@@ -28,8 +28,4 @@ class Note(
             }
         }
     })
-
-    override fun hasParent(): Boolean {
-        return parent != null
-    }
 }
