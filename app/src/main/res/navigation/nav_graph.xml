@@ -3,23 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/overviewFragment">
+    app:startDestination="@id/listViewFragment">
 
     <action
         android:id="@+id/global_to_aboutFragment"
         app:destination="@id/aboutFragment" />
 
     <action
-        android:id="@+id/global_to_overviewFragment"
-        app:destination="@id/overviewFragment" />
+        android:id="@+id/global_to_listViewFragment"
+        app:destination="@id/listViewFragment" />
 
     <fragment
-        android:id="@+id/overviewFragment"
-        android:name="se.payerl.noted.fragments.OverviewFragment"
-        android:label="fragment_overview"
-        tools:layout="@layout/fragment_overview" >
+        android:id="@+id/aboutFragment"
+        android:name="se.payerl.noted.fragments.AboutFragment"
+        android:label="fragment_about"
+        tools:layout="@layout/fragment_about" >
+    </fragment>
+    <fragment
+        android:id="@+id/listViewFragment"
+        android:name="se.payerl.noted.fragments.ListViewFragment"
+        android:label="fragment_list_view"
+        tools:layout="@layout/fragment_list_view" >
         <action
-            android:id="@+id/action_overviewFragment_to_listViewFragment"
+            android:id="@+id/action_listViewFragment_self"
             app:destination="@id/listViewFragment"
             app:enterAnim="@anim/enter_to_left"
             app:exitAnim="@anim/exit_to_left"
@@ -31,15 +37,4 @@
                 app:nullable="false" />
         </action>
     </fragment>
-    <fragment
-        android:id="@+id/aboutFragment"
-        android:name="se.payerl.noted.fragments.AboutFragment"
-        android:label="fragment_about"
-        tools:layout="@layout/fragment_about" >
-    </fragment>
-    <fragment
-        android:id="@+id/listViewFragment"
-        android:name="se.payerl.noted.fragments.ListViewFragment"
-        android:label="fragment_list_view"
-        tools:layout="@layout/fragment_list_view" />
 </navigation>
