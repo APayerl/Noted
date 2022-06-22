@@ -3,7 +3,9 @@ package se.payerl.noted
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.view.Window
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -18,6 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        requestWindowFeature(AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR)
         setContentView(R.layout.activity_main)
 
         toolbar = findViewById<Toolbar>(R.id.toolbar)

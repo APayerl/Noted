@@ -1,6 +1,7 @@
 package se.payerl.noted.model
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import se.payerl.noted.model.db.*
 import se.payerl.noted.utils.AddListener
 import se.payerl.noted.utils.ListenableList
@@ -12,7 +13,8 @@ class Note(
     override val uuid: String = UUID.randomUUID().toString(),
     override val type: NoteType = NoteType.LIST,
     override val createdAt: LocalDateTime = LocalDateTime.now(),
-    override var parent: String? = null
+    override var parent: String? = null,
+    override var selected: MutableLiveData<Boolean> = MutableLiveData(false)
 ) : NoteBase {
     private val m: Mapper = Mapper()
     @Inject lateinit var db: AppDatabase

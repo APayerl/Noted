@@ -1,5 +1,6 @@
 package se.payerl.noted.model
 
+import androidx.lifecycle.MutableLiveData
 import java.time.LocalDateTime
 import java.util.*
 
@@ -10,6 +11,7 @@ class NoteRowText(
     override var uuid: String = UUID.randomUUID().toString()
     override var type: NoteType = NoteType.ROW_TEXT
     override var createdAt: LocalDateTime = LocalDateTime.now()
+    override var selected: MutableLiveData<Boolean> = MutableLiveData(false)
 
     override fun isDone(): Boolean {
         return done

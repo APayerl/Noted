@@ -2,11 +2,14 @@ package se.payerl.noted.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
+import android.view.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.selection.*
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +22,7 @@ import se.payerl.noted.model.*
 import se.payerl.noted.model.db.AppDatabase
 import se.payerl.noted.model.db.Mapper
 import se.payerl.noted.utils.EditRowPopup
+import se.payerl.noted.utils.MyDetailsLookup
 import se.payerl.noted.utils.RowAddDialog
 import javax.inject.Inject
 
@@ -30,23 +34,61 @@ class ListViewFragment : Fragment() {
     lateinit var fab: FloatingActionButton
     lateinit var recyclerView: RecyclerView
     private lateinit var glAdapter: GeneralListAdapter
-    private val rowShortClickListener: (base: NoteBase) -> Unit = { base ->
-        if(base.type == NoteType.LIST) {
-            findNavController().navigate(ListViewFragmentDirections.actionListViewFragmentSelf(base.uuid))
+    private lateinit var tracker: SelectionTracker<String>
+    private val actionModeCallback: ActionMode.Callback = object : ActionMode.Callback {
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.menuInflater.inflate(R.menu.action_mode_menu, menu)
+            return true
         }
-    }
-    private val rowLongClickListener: (base: NoteBase) -> Unit = { base ->
-        if(glAdapter.isModifiable.value == true) {
-            EditRowPopup.open(requireContext(), base) { base ->
-                db.queryExecutor.execute {
-                    when(base.type) {
-                        NoteType.LIST -> db.noteDao().update(m.noteToNoteEntity(base as Note))
-                        NoteType.ROW_AMOUNT -> db.rowAmountDao().update(m.noteRowAmountToNoteRowAmountEntity(base as NoteRowAmount))
-                        NoteType.ROW_TEXT -> db.rowTextDao().update(m.noteRowTextToNoteRowTextEntity(base as NoteRowText))
+        override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+            return false
+        }
+        override fun onActionItemClicked(
+            mode: ActionMode?,
+            item: MenuItem
+        ): Boolean {
+            return when(item.itemId) {
+                R.id.delete -> {
+                    val mList: MutableSelection<String> = MutableSelection()
+                    tracker.copySelection(mList)
+                    mList.forEach { selection ->
+                        glAdapter.getItemByUUID(selection)?.let { base ->
+                            glAdapter.remove(base)
+                        }
                     }
+                    true
                 }
+                R.id.edit -> {
+//                    if(glAdapter.isModifiable.value == true) {
+//                        EditRowPopup.open(requireContext(), _base) { base ->
+//                            db.queryExecutor.execute {
+//                                when(base.type) {
+//                                    NoteType.LIST -> db.noteDao().update(m.noteToNoteEntity(base as Note))
+//                                    NoteType.ROW_AMOUNT -> db.rowAmountDao().update(m.noteRowAmountToNoteRowAmountEntity(base as NoteRowAmount))
+//                                    NoteType.ROW_TEXT -> db.rowTextDao().update(m.noteRowTextToNoteRowTextEntity(base as NoteRowText))
+//                                }
+//                            }
+//                        }
+//                    }
+                    false
+                }
+                else -> false
             }
         }
+        override fun onDestroyActionMode(mode: ActionMode?) {
+            tracker.selection.forEach { glAdapter.getItemByUUID(it)?.selected?.postValue(false) }
+            actionMode = null
+        }
+    }
+    private var actionMode: ActionMode? = null
+    private val rowShortClickListener: (base: NoteBase) -> Boolean = { base ->
+        if(actionMode == null && base.type == NoteType.LIST) {
+            findNavController().navigate(ListViewFragmentDirections.actionListViewFragmentSelf(base.uuid))
+            true
+        } else false
+    }
+    private val rowLongClickListener: (base: NoteBase) -> Unit = { _base ->
+        tracker.select(_base.uuid)
     }
 
     override fun onCreateView(
@@ -55,6 +97,7 @@ class ListViewFragment : Fragment() {
     ): View? {
         val rootView = inflater.inflate(R.layout.fragment_list_view, container, false)
         recyclerView = setupRecyclerView(rootView)
+        tracker = setupSelectionTracker(recyclerView, glAdapter)
 
         (requireActivity() as MainActivity).let { main ->
             val uuid: String? = arguments?.getString("uuid")
@@ -77,6 +120,37 @@ class ListViewFragment : Fragment() {
         }
     }
 
+    private fun setupSelectionTracker(recyclerView: RecyclerView, glAdapter: GeneralListAdapter): SelectionTracker<String> {
+        return SelectionTracker.Builder<String>(
+            "my-selection-id",
+            recyclerView,
+            object : ItemKeyProvider<String>(ItemKeyProvider.SCOPE_MAPPED) {
+                override fun getKey(position: Int): String {
+                    return glAdapter.dataList[position].uuid
+                }
+
+                override fun getPosition(key: String): Int {
+                    return glAdapter.dataList.indexOfFirst { x -> x.uuid == key }
+                }
+            },
+            MyDetailsLookup(recyclerView),
+            StorageStrategy.createStringStorage()
+        ).withSelectionPredicate(
+            SelectionPredicates.createSelectAnything()
+        ).build().also {
+            it.addObserver(object : SelectionTracker.SelectionObserver<String>() {
+                override fun onItemStateChanged(key: String, selected: Boolean) {
+                    glAdapter.getItemByUUID(key)?.selected?.postValue(selected)
+                    if(actionMode == null) {
+                        if(selected) actionMode = (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                    } else {
+                        if(!tracker.hasSelection()) actionMode?.finish()
+                    }
+                }
+            })
+        }
+    }
+
     private fun setupFloatingActionButton(rootView: View, uuid: String?): FloatingActionButton {
         return rootView.findViewById<FloatingActionButton>(R.id.floatingActionButton).apply {
             val defaultType: NoteType = NoteType.valueOf(
@@ -85,7 +159,7 @@ class ListViewFragment : Fragment() {
             )
             setOnClickListener {
                 //TODO Fix add dialog for a new list?
-                glAdapter.addToList(GeneralListAdapter.getRow(if(uuid == null) NoteType.LIST else defaultType, uuid))
+                glAdapter.add(listOf(GeneralListAdapter.getRow(if(uuid == null) NoteType.LIST else defaultType, uuid)))
             }
             uuid?.let {
                 setOnLongClickListener {
@@ -95,10 +169,12 @@ class ListViewFragment : Fragment() {
                         NoteType.values().map { it.toString() }.toTypedArray(),
                         NoteType.values().indexOf(defaultType)
                     ) { chosen ->
-                        glAdapter.addToList(
-                            GeneralListAdapter.getRow(
-                                NoteType.values()[chosen],
-                                uuid
+                        glAdapter.add(
+                            listOf(
+                                GeneralListAdapter.getRow(
+                                    NoteType.values()[chosen],
+                                    uuid
+                                )
                             )
                         )
                     }
@@ -139,7 +215,7 @@ class ListViewFragment : Fragment() {
             list.sortBy(NoteBase::createdAt)
 
             this@ListViewFragment.requireActivity().runOnUiThread {
-                glAdapter.populate(list)
+                glAdapter.add(list)
             }
         }
     }
