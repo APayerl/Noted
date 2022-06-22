@@ -15,14 +15,14 @@ class NoteEntity: se.payerl.noted.model.db.Entity {
 
     @PrimaryKey
     @ColumnInfo(name = "uuid")
-    var uuid: String = ""
+    override var uuid: String = ""
 
     @ColumnInfo(name = "type")
-    var type: NoteType = NoteType.LIST
+    override var type: NoteType = NoteType.LIST
 
     @ColumnInfo(name = "created_at")
-    var createdAt: LocalDateTime = LocalDateTime.now()
+    override var createdAt: LocalDateTime = LocalDateTime.now()
 
     @ColumnInfo(name = "parent")
-    var parent: String? = null
+    override var parent: String? = null
 }

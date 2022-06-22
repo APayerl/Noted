@@ -53,48 +53,48 @@ class GeneralListAdapter(val db: AppDatabase, val fastListener: (note: NoteBase)
         return dataList[position].type.ordinal
     }
 
+    fun sort() {
+        dataList.sortWith(sortOrderCheckedOrNotAndThenCreatedAt)
+        notifyDataSetChanged()
+    }
+
     fun getItemByUUID(uuid: String): NoteBase? {
         return dataList.find { base -> base.uuid == uuid }
     }
 
-    fun add(content: Collection<NoteBase>) {
-        content.forEach { base ->
-            dataList.add(base)
-            if(content.size == 1) {
-                persistNote(base)
-                dataList.sortWith(sortOrderCheckedOrNotAndThenCreatedAt)
-                notifyDataSetChanged()
-            } else {
-                notifyItemInserted(dataList.size - 1)
-            }
-        }
+    fun populate(content: Collection<NoteBase>) {
+        dataList.addAll(content)
+        sort()
     }
 
-    fun remove(content: NoteBase): Boolean {
+    fun add(content: NoteBase) {
+        dataList.add(content)
+        persistNote(content)
+        notifyItemInserted(dataList.size - 1)
+    }
+
+    fun remove(content: NoteBase) {
         var result = false
         var index = dataList.indexOf(content)
         val m = Mapper()
-        when(content.type) {
-            NoteType.ROW_TEXT -> {
-                db.queryExecutor.execute {
-                    db.rowTextDao()
-                        .delete(m.noteRowTextToNoteRowTextEntity(content as NoteRowText))
+
+        db.queryExecutor.execute { dbDelete(content.uuid, content.type) }
+        dataList.removeAt(index)
+        notifyItemRemoved(index)
+    }
+
+    fun dbDelete(uuid: String, type: NoteType) {
+        when(type) {
+            NoteType.ROW_TEXT, NoteType.ROW_AMOUNT -> getDao(type, db).delete(uuid)
+            NoteType.LIST -> {
+                listOf(db.rowTextDao(), db.rowAmountDao(), db.noteDao()).map {
+                    it.findByParent(uuid)
+                }.flatMap { it }.forEach {
+                    dbDelete(it.uuid, it.type)
                 }
-                dataList.removeAt(index)
-                notifyItemRemoved(index)
-                result = true
-            }
-            NoteType.ROW_AMOUNT -> {
-                db.queryExecutor.execute {
-                    db.rowAmountDao()
-                        .delete(m.noteRowAmountToNoteRowAmountEntity(content as NoteRowAmount))
-                }
-                dataList.removeAt(index)
-                notifyItemRemoved(index)
-                result = true
+                getDao(type, db).delete(uuid)
             }
         }
-        return result
     }
 
     private fun persistNote(base: NoteBase) {
@@ -107,21 +107,21 @@ class GeneralListAdapter(val db: AppDatabase, val fastListener: (note: NoteBase)
                     val entity: NoteEntity = m.noteToNoteEntity(base as Note)
                     if(dao.hasUUID(base.uuid)) {
                         dao.update(entity)
-                    } else dao.insert(entity)
+                    } else dao.insertAll(entity)
                 }
                 NoteType.ROW_AMOUNT -> {
                     val dao = db.rowAmountDao()
                     val entity: NoteRowAmountEntity = m.noteRowAmountToNoteRowAmountEntity(base as NoteRowAmount)
                     if(dao.hasUUID(base.uuid)) {
                         dao.update(entity)
-                    } else dao.insert(entity)
+                    } else dao.insertAll(entity)
                 }
                 NoteType.ROW_TEXT -> {
                     val dao = db.rowTextDao()
                     val entity: NoteRowTextEntity = m.noteRowTextToNoteRowTextEntity(base as NoteRowText)
                     if(dao.hasUUID(base.uuid)) {
                         dao.update(entity)
-                    } else dao.insert(entity)
+                    } else dao.insertAll(entity)
                     m.noteRowTextToNoteRowTextEntity(base)
                 }
             }
@@ -129,12 +129,20 @@ class GeneralListAdapter(val db: AppDatabase, val fastListener: (note: NoteBase)
     }
 
     companion object {
-        fun getRow(row: NoteType, uuid: String?): NoteBase {
+        fun getRow(row: NoteType, parent: String?): NoteBase {
             return when(row) {
-                NoteType.ROW_TEXT -> NoteRowText(parent = uuid).apply { content = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli().toString() }
-                NoteType.ROW_AMOUNT -> NoteRowAmount(parent = uuid).apply { content = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli().toString() }
-                NoteType.LIST -> Note(parent = uuid).apply { name = createdAt.format(DateTimeFormatter.ofPattern("dd/MM-yy HH:mm:ss")) }
+                NoteType.ROW_TEXT -> NoteRowText(parent = parent).apply { content = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli().toString() }
+                NoteType.ROW_AMOUNT -> NoteRowAmount(parent = parent).apply { content = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli().toString() }
+                NoteType.LIST -> Note(parent = parent).apply { name = createdAt.format(DateTimeFormatter.ofPattern("dd/MM-yy HH:mm:ss")) }
             }
+        }
+
+        fun getDao(type: NoteType, db: AppDatabase): Dao<Entity> {
+            return when(type) {
+                NoteType.ROW_AMOUNT -> db.rowAmountDao()
+                NoteType.ROW_TEXT -> db.rowTextDao()
+                NoteType.LIST -> db.noteDao()
+            } as Dao<Entity>
         }
     }
 }

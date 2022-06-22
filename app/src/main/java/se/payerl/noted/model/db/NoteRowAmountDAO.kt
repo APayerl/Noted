@@ -23,11 +23,11 @@ interface NoteRowAmountDAO: se.payerl.noted.model.db.Dao<NoteRowAmountEntity> {
     @Insert
     override fun insertAll(vararg items: NoteRowAmountEntity)
 
-    @Insert
-    override fun insert(item: NoteRowAmountEntity)
-
     @Delete
     override fun delete(item: NoteRowAmountEntity)
+
+    @Query("DELETE FROM row_amount WHERE uuid = :uuid")
+    override fun delete(uuid: String)
 
     @Query("SELECT CASE WHEN uuid = :uuid THEN 1 ELSE 0 END AS result FROM row_amount WHERE uuid = :uuid")
     override fun hasUUID(uuid: String): Boolean

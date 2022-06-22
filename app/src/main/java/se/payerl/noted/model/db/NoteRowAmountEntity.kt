@@ -10,7 +10,7 @@ import java.util.*
 @Entity(tableName = "row_amount")
 class NoteRowAmountEntity: se.payerl.noted.model.db.Entity {
     @ColumnInfo(name = "parent")
-    var parent: String? = null
+    override var parent: String? = null
 
     @ColumnInfo(name = "content")
     var content: String = ""
@@ -23,11 +23,11 @@ class NoteRowAmountEntity: se.payerl.noted.model.db.Entity {
 
     @PrimaryKey
     @ColumnInfo(name = "uuid")
-    var uuid: String = ""
+    override var uuid: String = ""
 
     @ColumnInfo(name = "type")
-    var type: NoteType = NoteType.ROW_AMOUNT
+    override var type: NoteType = NoteType.ROW_AMOUNT
 
     @ColumnInfo(name = "created_at")
-    var createdAt: LocalDateTime = LocalDateTime.now()
+    override var createdAt: LocalDateTime = LocalDateTime.now()
 }

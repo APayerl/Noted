@@ -37,8 +37,7 @@ class NoteVH(gla: GeneralListAdapter, itemView: View, parent: ViewGroup, val sho
         } else checkbox.visibility = View.GONE
 
         checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
-            gla.dataList.sortWith(gla.sortOrderCheckedOrNotAndThenCreatedAt)
-            gla.notifyDataSetChanged()
+            gla.sort()
         }
         trash.setOnClickListener {
             val index = gla.dataList.indexOf(data)

@@ -1,13 +1,19 @@
 package se.payerl.noted.fragments
 
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
+import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.selection.*
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -99,8 +105,7 @@ class ListViewFragment : Fragment() {
         recyclerView = setupRecyclerView(rootView)
         tracker = setupSelectionTracker(recyclerView, glAdapter)
 
-        (requireActivity() as MainActivity).let { main ->
-            val uuid: String? = arguments?.getString("uuid")
+        arguments?.getString("uuid").let { uuid ->
             fab = setupFloatingActionButton(rootView, uuid)
             setToolbarTitle(uuid ?: "Noted")
             populateAdapter(uuid)
@@ -157,11 +162,14 @@ class ListViewFragment : Fragment() {
                 requireContext().getSharedPreferences("", Context.MODE_PRIVATE)
                     .getString("default_add_action", NoteType.ROW_TEXT.toString())!!
             )
-            setOnClickListener {
-                //TODO Fix add dialog for a new list?
-                glAdapter.add(listOf(GeneralListAdapter.getRow(if(uuid == null) NoteType.LIST else defaultType, uuid)))
-            }
-            uuid?.let {
+            if(uuid == null) {
+                setOnClickListener {
+                    openListDialog() { glAdapter.add(it) }
+                }
+            } else {
+                setOnClickListener {
+                    glAdapter.add(GeneralListAdapter.getRow(defaultType, uuid))
+                }
                 setOnLongClickListener {
                     RowAddDialog.get(
                         this@ListViewFragment.requireContext(),
@@ -169,18 +177,42 @@ class ListViewFragment : Fragment() {
                         NoteType.values().map { it.toString() }.toTypedArray(),
                         NoteType.values().indexOf(defaultType)
                     ) { chosen ->
-                        glAdapter.add(
-                            listOf(
-                                GeneralListAdapter.getRow(
-                                    NoteType.values()[chosen],
-                                    uuid
-                                )
-                            )
-                        )
+                        if(NoteType.LIST.ordinal == chosen) {
+                            openListDialog(uuid) { glAdapter.add(it) }
+                        } else glAdapter.add(GeneralListAdapter.getRow(
+                            NoteType.values()[chosen],
+                            uuid
+                        ))
                     }
                     true
                 }
             }
+        }
+    }
+
+    private fun openListDialog(parent: String? = null, callback: (note: Note) -> Unit) {
+        View.inflate(requireContext(), R.layout.new_list_dialog, null).let { view ->
+            AlertDialog.Builder(requireContext())
+                .setView(R.layout.new_list_dialog)
+                .setPositiveButton("Insert") { dialogInterface, digit ->
+                    callback(Note(parent = parent).apply {
+                        name = (dialogInterface as AlertDialog).findViewById<EditText>(R.id.inputField)?.text.toString()
+                    })
+                }
+                .create().apply {
+                    setOnShowListener {
+                        val positiveBtn = (it as AlertDialog).getButton(DialogInterface.BUTTON_POSITIVE).apply {
+                            isEnabled = false
+                        }
+                        val inputField = (it as AlertDialog).findViewById<EditText>(R.id.inputField)?.apply {
+                            addTextChangedListener {
+                                it?.let {
+                                    positiveBtn.isEnabled = it.isNotEmpty()
+                                }
+                            }
+                        }
+                    }
+                }.show()
         }
     }
 
@@ -215,7 +247,7 @@ class ListViewFragment : Fragment() {
             list.sortBy(NoteBase::createdAt)
 
             this@ListViewFragment.requireActivity().runOnUiThread {
-                glAdapter.add(list)
+                glAdapter.populate(list)
             }
         }
     }
