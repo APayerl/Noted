@@ -9,10 +9,10 @@ interface NoteRowTextDAO: se.payerl.noted.model.db.Dao<NoteRowTextEntity> {
     override fun getAll(): List<NoteRowTextEntity>
 
     @Query("SELECT * FROM row_text WHERE content LIKE :content LIMIT 1")
-    override fun findByContent(content: String): NoteRowTextEntity
+    override fun findByContent(content: String): NoteRowTextEntity?
 
     @Query("SELECT * FROM row_text WHERE uuid LIKE :uuid LIMIT 1")
-    override fun findByUUID(uuid: String): NoteRowTextEntity
+    override fun findByUUID(uuid: String): NoteRowTextEntity?
 
     @Query("SELECT * FROM row_text WHERE parent = :uuid")
     override fun findByParent(uuid: String): List<NoteRowTextEntity>

@@ -9,10 +9,10 @@ interface NoteRowAmountDAO: se.payerl.noted.model.db.Dao<NoteRowAmountEntity> {
     override fun getAll(): List<NoteRowAmountEntity>
 
     @Query("SELECT * FROM row_amount WHERE content LIKE :content LIMIT 1")
-    override fun findByContent(content: String): NoteRowAmountEntity
+    override fun findByContent(content: String): NoteRowAmountEntity?
 
     @Query("SELECT * FROM row_amount WHERE uuid LIKE :uuid LIMIT 1")
-    override fun findByUUID(uuid: String): NoteRowAmountEntity
+    override fun findByUUID(uuid: String): NoteRowAmountEntity?
 
     @Query("SELECT * FROM row_amount WHERE parent = :uuid")
     override fun findByParent(uuid: String): List<NoteRowAmountEntity>

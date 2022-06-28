@@ -64,13 +64,30 @@ class ListViewFragment : Fragment() {
                 }
                 R.id.edit -> {
                     if(glAdapter.isModifiable.value == true) {
-                        EditRowPopup.open(requireContext(), _base) { base ->
+                        val onSave: (base: NoteBase) -> Unit = { base ->
                             db.queryExecutor.execute {
                                 when(base.type) {
                                     NoteType.LIST -> db.noteDao().update(m.noteToNoteEntity(base as Note))
                                     NoteType.ROW_AMOUNT -> db.rowAmountDao().update(m.noteRowAmountToNoteRowAmountEntity(base as NoteRowAmount))
                                     NoteType.ROW_TEXT -> db.rowTextDao().update(m.noteRowTextToNoteRowTextEntity(base as NoteRowText))
                                 }
+                            }
+                            val index = glAdapter.dataList.indexOfFirst { it.uuid == base.uuid }
+                            glAdapter.dataList.removeAt(index)
+                            glAdapter.dataList.add(index, base)
+                            glAdapter.notifyItemChanged(index)
+                            tracker.deselect(base.uuid)
+                        }
+                        db.queryExecutor.execute {
+                            var row: NoteBase? = null
+                            tracker.selection.elementAt(0).let { uuid ->
+                                db.noteDao().findByUUID(uuid)?.let { note -> row = m.noteEntityToNote(note) }
+                                db.rowTextDao().findByUUID(uuid)?.let { note -> row = m.noteRowTextEntityToNoteRowText(note) }
+                                db.rowAmountDao().findByUUID(uuid)?.let { note -> row = m.noteRowAmountEntityToNoteRowAmount(note) }
+                            }
+
+                            this@ListViewFragment.requireActivity().runOnUiThread {
+                                EditRowPopup.open(requireContext(), row!!, onSave)
                             }
                         }
                     }
