@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <include
+        android:id="@+id/first"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/input_field_with_header" />
+    <include
+        android:id="@+id/second"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/input_field_with_header" />
+
+    <NumberPicker
+        android:id="@+id/numberPicker"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" />
+    <include
+        android:id="@+id/item_type_fields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/input_field_with_header" />
+    <include
+        android:id="@+id/item_uuid_fields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/input_field_with_header" />
+</LinearLayout>

@@ -7,7 +7,7 @@ interface Dao<T> {
     fun findByParent(uuid: String): List<T>
     fun update(item: T)
     fun insertAll(vararg items: T)
-    fun insert(item: T)
     fun delete(item: T)
+    fun delete(uuid: String)
     fun hasUUID(uuid: String): Boolean
 }

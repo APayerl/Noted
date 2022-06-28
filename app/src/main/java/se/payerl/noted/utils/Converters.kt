@@ -1,6 +1,8 @@
 package se.payerl.noted.utils
 
 import androidx.room.TypeConverter
+import se.payerl.noted.model.db.Entity
+import se.payerl.noted.model.db.NoteEntity
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -17,5 +19,15 @@ class Converters {
     @TypeConverter
     fun toTimestamp(value: LocalDateTime): Long {
         return value.toInstant(ZoneOffset.UTC).toEpochMilli()
+    }
+
+    @TypeConverter
+    fun fromNoteEntity(value: NoteEntity): Entity {
+        return value
+    }
+
+    @TypeConverter
+    fun toNoteEntity(value: Entity): NoteEntity {
+        return value as NoteEntity
     }
 }

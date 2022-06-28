@@ -42,4 +42,11 @@
             android:contentDescription="delete button"
             app:layout_constraintDimensionRatio="1:1" />
     </LinearLayout>
+
+    <View
+        android:id="@+id/selection_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="#9700C4FF" />
 </androidx.constraintlayout.widget.ConstraintLayout>

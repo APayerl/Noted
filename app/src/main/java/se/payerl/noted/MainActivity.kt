@@ -14,12 +14,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     lateinit var abdt: ActionBarDrawerToggle
+    lateinit var toolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        requestWindowFeature(AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR)
         setContentView(R.layout.activity_main)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        toolbar = findViewById<Toolbar>(R.id.toolbar)
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val navView = drawer.findViewById<NavigationView>(R.id.nav_view)
 
@@ -31,8 +33,8 @@ class MainActivity : AppCompatActivity() {
 
         navView.setNavigationItemSelectedListener {
             when(it.itemId) {
-                R.id.drawer_list_overview -> findNavController(R.id.nav_host_fragment).navigate(NavGraphDirections.globalToAboutFragment())
-                R.id.drawer_about -> findNavController(R.id.nav_host_fragment).navigate(NavGraphDirections.globalToOverviewFragment())
+                R.id.drawer_list_root -> findNavController(R.id.nav_host_fragment).navigate(NavGraphDirections.globalToListViewFragment())
+                R.id.drawer_about -> findNavController(R.id.nav_host_fragment).navigate(NavGraphDirections.globalToAboutFragment())
             }
             drawer.close()
             true

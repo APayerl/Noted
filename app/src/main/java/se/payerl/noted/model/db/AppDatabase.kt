@@ -11,4 +11,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDAO
     abstract fun rowTextDao(): NoteRowTextDAO
     abstract fun rowAmountDao(): NoteRowAmountDAO
+    abstract fun mixedDao(): MixTableQueriesDao
 }
