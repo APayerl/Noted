@@ -31,14 +31,15 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ListViewFragment : Fragment() {
-    val args: ListViewFragmentArgs by navArgs()
+    private val args: ListViewFragmentArgs by navArgs()
     @Inject lateinit var db: AppDatabase
-    lateinit var note: Note
     private val m: Mapper = Mapper()
-    lateinit var fab: FloatingActionButton
-    lateinit var recyclerView: RecyclerView
+    private lateinit var fab: FloatingActionButton
+    private lateinit var recyclerView: RecyclerView
     private lateinit var glAdapter: GeneralListAdapter
+    private var actionMode: ActionMode? = null
     private lateinit var tracker: SelectionTracker<String>
+
     private val actionModeCallback: ActionMode.Callback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.menuInflater.inflate(R.menu.action_mode_menu, menu)
@@ -101,7 +102,6 @@ class ListViewFragment : Fragment() {
             actionMode = null
         }
     }
-    private var actionMode: ActionMode? = null
     private val rowShortClickListener: (base: NoteBase) -> Boolean = { base ->
         if(actionMode == null && base.type == NoteType.LIST) {
             val ids: Array<String>? = listOf<List<String?>?>(
