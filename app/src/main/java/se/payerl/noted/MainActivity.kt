@@ -3,21 +3,13 @@ package se.payerl.noted
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.util.Log
-import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.findNavController
 import com.google.android.material.navigation.NavigationView
 import dagger.hilt.android.AndroidEntryPoint
-import se.payerl.noted.fragments.AboutFragment
-import se.payerl.noted.fragments.AboutFragmentDirections
-import se.payerl.noted.fragments.OverviewFragment
-import se.payerl.noted.fragments.OverviewFragmentDirections
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
