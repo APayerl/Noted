@@ -6,14 +6,40 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import se.payerl.noted.R
 import se.payerl.noted.adapters.GeneralListAdapter
 import se.payerl.noted.model.*
+import se.payerl.noted.model.db.Mapper
 
-class NoteAmountVH(gla: GeneralListAdapter, itemView: View, parent: ViewGroup, val shortListener: (note: NoteRowAmount) -> Boolean, longListener: (note: NoteRowAmount) -> Unit): GeneralVH<NoteRowAmount>(gla, itemView, parent, longListener) {
+class NoteAmountVH(gla: GeneralListAdapter, itemView: View, parent: ViewGroup, val shortListener: (note: NoteRowAmount) -> Boolean, longListener: (note: NoteRowAmount) -> Unit
+): GeneralVH<NoteRowAmount>(gla, itemView, parent, longListener) {
+    private val seekbarListener: SeekBar.OnSeekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+            checkbox.setOnCheckedChangeListener(null)
+            checkbox.isChecked = progress == seekBar.max
+            checkbox.setOnCheckedChangeListener(checkboxChangeListener)
+            data.amount = seekBar.progress
+            gla.db.queryExecutor.execute {
+                gla.db.rowAmountDao().update(Mapper().noteRowAmountToNoteRowAmountEntity(data))
+            }
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar) {}
+        override fun onStopTrackingTouch(seekBar: SeekBar) {}
+    }
+    override val checkboxChangeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        data.amount = 0
+        seekbar.setOnSeekBarChangeListener(null)
+        seekbar.progress = seekbar.min
+        seekbar.setOnSeekBarChangeListener(seekbarListener)
+        gla.db.queryExecutor.execute {
+            gla.db.rowAmountDao().update(Mapper().noteRowAmountToNoteRowAmountEntity(data))
+        }
+    }
     override lateinit var data: NoteRowAmount
     private val seekbar: SeekBar
     private val content: TextView
@@ -47,22 +73,8 @@ class NoteAmountVH(gla: GeneralListAdapter, itemView: View, parent: ViewGroup, v
             min = sp.getInt("number_picker_min_value", 0)
 
             progress = data.amount
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    Log.w("SeekBar", "${data.uuid}: $progress")
-                    checkbox.isChecked = progress == max
-                }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                }
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                }
-
-            })
+            setOnSeekBarChangeListener(seekbarListener)
         }
         content.apply {
             text = data.content

@@ -3,6 +3,7 @@ package se.payerl.noted.adapters.view_holders
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -13,6 +14,7 @@ import se.payerl.noted.adapters.GeneralListAdapter
 import se.payerl.noted.model.NoteBase
 
 abstract class GeneralVH<T>(val gla: GeneralListAdapter, private val itemView: View, val parent: ViewGroup, val longListener: (note: T) -> Unit) : RecyclerView.ViewHolder(itemView) {
+    abstract val checkboxChangeListener: CompoundButton.OnCheckedChangeListener
     abstract var data: T
     val checkbox: CheckBox = itemView.findViewById<CheckBox>(R.id.general_list_checkbox)
     val trash: ImageView = itemView.findViewById<ImageView>(R.id.item_delete_btn)

@@ -3,18 +3,15 @@ package se.payerl.noted.fragments
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.appcompat.view.ActionMode
-import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.selection.*
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,6 +31,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ListViewFragment : Fragment() {
+    val args: ListViewFragmentArgs by navArgs()
     @Inject lateinit var db: AppDatabase
     lateinit var note: Note
     private val m: Mapper = Mapper()
@@ -65,17 +63,17 @@ class ListViewFragment : Fragment() {
                     true
                 }
                 R.id.edit -> {
-//                    if(glAdapter.isModifiable.value == true) {
-//                        EditRowPopup.open(requireContext(), _base) { base ->
-//                            db.queryExecutor.execute {
-//                                when(base.type) {
-//                                    NoteType.LIST -> db.noteDao().update(m.noteToNoteEntity(base as Note))
-//                                    NoteType.ROW_AMOUNT -> db.rowAmountDao().update(m.noteRowAmountToNoteRowAmountEntity(base as NoteRowAmount))
-//                                    NoteType.ROW_TEXT -> db.rowTextDao().update(m.noteRowTextToNoteRowTextEntity(base as NoteRowText))
-//                                }
-//                            }
-//                        }
-//                    }
+                    if(glAdapter.isModifiable.value == true) {
+                        EditRowPopup.open(requireContext(), _base) { base ->
+                            db.queryExecutor.execute {
+                                when(base.type) {
+                                    NoteType.LIST -> db.noteDao().update(m.noteToNoteEntity(base as Note))
+                                    NoteType.ROW_AMOUNT -> db.rowAmountDao().update(m.noteRowAmountToNoteRowAmountEntity(base as NoteRowAmount))
+                                    NoteType.ROW_TEXT -> db.rowTextDao().update(m.noteRowTextToNoteRowTextEntity(base as NoteRowText))
+                                }
+                            }
+                        }
+                    }
                     false
                 }
                 else -> false
@@ -89,7 +87,15 @@ class ListViewFragment : Fragment() {
     private var actionMode: ActionMode? = null
     private val rowShortClickListener: (base: NoteBase) -> Boolean = { base ->
         if(actionMode == null && base.type == NoteType.LIST) {
-            findNavController().navigate(ListViewFragmentDirections.actionListViewFragmentSelf(base.uuid))
+            val ids: Array<String>? = listOf<List<String?>?>(
+                args.uuids?.asList(),
+                listOf(base.uuid)
+            )
+            .filterNotNull()
+            .flatten()
+            .filterNotNull()
+            .toTypedArray()
+            findNavController().navigate(ListViewFragmentDirections.actionListViewFragmentSelf(ids))
             true
         } else false
     }
@@ -105,11 +111,9 @@ class ListViewFragment : Fragment() {
         recyclerView = setupRecyclerView(rootView)
         tracker = setupSelectionTracker(recyclerView, glAdapter)
 
-        arguments?.getString("uuid").let { uuid ->
-            fab = setupFloatingActionButton(rootView, uuid)
-            setToolbarTitle(uuid ?: "Noted")
-            populateAdapter(uuid)
-        }
+        fab = setupFloatingActionButton(rootView, args.uuids?.lastOrNull())
+        populateAdapter(args.uuids?.lastOrNull())
+        setToolbarTitle(args.uuids)
         return rootView
     }
 
@@ -149,6 +153,7 @@ class ListViewFragment : Fragment() {
                     if(actionMode == null) {
                         if(selected) actionMode = (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
                     } else {
+                        actionMode!!.menu.findItem(R.id.edit).isVisible = tracker.selection.size() <= 1
                         if(!tracker.hasSelection()) actionMode?.finish()
                     }
                 }
@@ -167,24 +172,29 @@ class ListViewFragment : Fragment() {
                     openListDialog() { glAdapter.add(it) }
                 }
             } else {
-                setOnClickListener {
-                    glAdapter.add(GeneralListAdapter.getRow(defaultType, uuid))
-                }
-                setOnLongClickListener {
-                    RowAddDialog.get(
-                        this@ListViewFragment.requireContext(),
-                        "What row type?",
-                        NoteType.values().map { it.toString() }.toTypedArray(),
-                        NoteType.values().indexOf(defaultType)
-                    ) { chosen ->
-                        if(NoteType.LIST.ordinal == chosen) {
-                            openListDialog(uuid) { glAdapter.add(it) }
-                        } else glAdapter.add(GeneralListAdapter.getRow(
-                            NoteType.values()[chosen],
-                            uuid
-                        ))
+                db.queryExecutor.execute {
+                    db.noteDao().findByUUID(uuid)?.let {
+                        val note = m.noteEntityToNote(it)
+                        setOnClickListener {
+                            glAdapter.add(GeneralListAdapter.getRow(defaultType, note))
+                        }
+                        setOnLongClickListener {
+                            RowAddDialog.get(
+                                this@ListViewFragment.requireContext(),
+                                "What row type?",
+                                NoteType.values().map { it.toString() }.toTypedArray(),
+                                NoteType.values().indexOf(defaultType)
+                            ) { chosen ->
+                                if(NoteType.LIST.ordinal == chosen) {
+                                    openListDialog(uuid) { glAdapter.add(it) }
+                                } else glAdapter.add(GeneralListAdapter.getRow(
+                                    NoteType.values()[chosen],
+                                    note
+                                ))
+                            }
+                            true
+                        }
                     }
-                    true
                 }
             }
         }
@@ -216,14 +226,17 @@ class ListViewFragment : Fragment() {
         }
     }
 
-    private fun setToolbarTitle(content: String) {
+    private fun setToolbarTitle(content: Array<String>?) {
         (requireActivity() as MainActivity).let { main ->
-            db.queryExecutor.execute {
-                db.noteDao().findByUUID(content).let { entity ->
-                    entity?.let { note = m.noteEntityToNote(it) }
-                    val name = entity?.name
+            if(content == null) main.toolbar.title = "Noted"
+            else {
+                db.queryExecutor.execute {
+                    val sb = StringBuilder()
+                    content
+                        .map { uuid -> db.noteDao().findByUUID(uuid)?.name }
+                        .forEach { name -> sb.append("${if(sb.isNotEmpty()) " > " else ""}$name") }
                     main.runOnUiThread {
-                        main.toolbar.title = name ?: content
+                        main.toolbar.title = sb.toString()
                     }
                 }
             }
@@ -236,15 +249,8 @@ class ListViewFragment : Fragment() {
             if (uuid == null) {
                 list.addAll(db.noteDao().findRootLists().map { m.noteEntityToNote(it) })
             } else {
-                list.addAll(
-                    db.rowTextDao().findByParent(uuid)
-                        .map { m.noteRowTextEntityToNoteRowText(it) })
-                list.addAll(
-                    db.rowAmountDao().findByParent(uuid)
-                        .map { m.noteRowAmountEntityToNoteRowAmount(it) })
-                list.addAll(db.noteDao().findByParent(uuid).map { m.noteEntityToNote(it) })
+                list.addAll(db.mixedDao().getChildren(uuid).map { m.entityToBase(it) })
             }
-            list.sortBy(NoteBase::createdAt)
 
             this@ListViewFragment.requireActivity().runOnUiThread {
                 glAdapter.populate(list)

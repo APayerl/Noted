@@ -17,7 +17,7 @@ interface NoteDAO: se.payerl.noted.model.db.Dao<NoteEntity> {
     @Query("SELECT * FROM note WHERE parent = :uuid")
     override fun findByParent(uuid: String): List<NoteEntity>
 
-    @Query("SELECT * FROM note WHERE parent IS NULL")
+    @Query("SELECT * FROM note WHERE parent IS NULL ORDER BY created_at")
     fun findRootLists(): List<NoteEntity>
 
     @Update

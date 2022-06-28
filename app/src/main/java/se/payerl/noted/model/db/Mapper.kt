@@ -3,10 +3,8 @@ package se.payerl.noted.model.db
 import se.payerl.noted.model.*
 
 class Mapper {
-    fun noteEntityToNote(noteEntity: NoteEntity): Note {
-        return Note(noteEntity.uuid, noteEntity.type, noteEntity.createdAt, noteEntity.parent).apply {
-            name = noteEntity.name
-        }
+    fun noteEntityToNote(note: NoteEntity): Note {
+        return Note(note.uuid, note.type, note.createdAt, note.parent, note.name)
     }
 
     fun noteToNoteEntity(note: Note): NoteEntity {
@@ -40,23 +38,18 @@ class Mapper {
     }
 
     fun noteRowTextEntityToNoteRowText(row: NoteRowTextEntity): NoteRowText {
-        return NoteRowText(row.parent).apply {
-            content = row.content
-            done = row.done
-            uuid = row.uuid
-            type = row.type
-            createdAt = row.createdAt
-        }
+        return NoteRowText(row.parent, row.content, row.done, row.uuid, row.createdAt, row.type)
     }
 
     fun noteRowAmountEntityToNoteRowAmount(row: NoteRowAmountEntity): NoteRowAmount {
-        return NoteRowAmount(row.parent).apply {
-            content = row.content
-            amountWhenFinished.postValue(row.amountWhenFinished)
-            amount = row.amount
-            uuid = row.uuid
-            type = row.type
-            createdAt = row.createdAt
+        return NoteRowAmount(row.parent, row.content, row.amountWhenFinished, row.amount, row.uuid, row.type, row.createdAt)
+    }
+
+    fun entityToBase(entity: Entity): NoteBase {
+        return when(entity.type) {
+            NoteType.LIST -> noteEntityToNote(entity as NoteEntity)
+            NoteType.ROW_AMOUNT -> noteRowAmountEntityToNoteRowAmount(entity as NoteRowAmountEntity)
+            NoteType.ROW_TEXT -> noteRowTextEntityToNoteRowText(entity as NoteRowTextEntity)
         }
     }
 }

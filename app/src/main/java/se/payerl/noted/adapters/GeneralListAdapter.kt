@@ -129,11 +129,17 @@ class GeneralListAdapter(val db: AppDatabase, val fastListener: (note: NoteBase)
     }
 
     companion object {
-        fun getRow(row: NoteType, parent: String?): NoteBase {
+        fun getRow(row: NoteType, parent: Note?): NoteBase {
             return when(row) {
-                NoteType.ROW_TEXT -> NoteRowText(parent = parent).apply { content = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli().toString() }
-                NoteType.ROW_AMOUNT -> NoteRowAmount(parent = parent).apply { content = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli().toString() }
-                NoteType.LIST -> Note(parent = parent).apply { name = createdAt.format(DateTimeFormatter.ofPattern("dd/MM-yy HH:mm:ss")) }
+                NoteType.ROW_TEXT -> NoteRowText(parent = parent?.uuid).apply { content = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli().toString() }.also { child ->
+                    parent?.content?.add(child)
+                }
+                NoteType.ROW_AMOUNT -> NoteRowAmount(parent = parent?.uuid).apply { content = createdAt.toInstant(ZoneOffset.UTC).toEpochMilli().toString() }.also { child ->
+                    parent?.content?.add(child)
+                }
+                NoteType.LIST -> Note(parent = parent?.uuid).apply { name = createdAt.format(DateTimeFormatter.ofPattern("dd/MM-yy HH:mm:ss")) }.also { child ->
+                    parent?.content?.add(child)
+                }
             }
         }
 

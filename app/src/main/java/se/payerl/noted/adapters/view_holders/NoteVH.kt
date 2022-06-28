@@ -3,6 +3,7 @@ package se.payerl.noted.adapters.view_holders
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
 import se.payerl.noted.R
@@ -13,6 +14,10 @@ class NoteVH(gla: GeneralListAdapter, itemView: View, parent: ViewGroup, val sho
     override lateinit var data: Note
     private lateinit var name: TextView
     private lateinit var description: TextView
+    override val checkboxChangeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+//        gla.sort()
+        data.isDone()
+    }
 
     init {
         LayoutInflater.from(parent.context).inflate(R.layout.list_item_note, parent, false).let { sub ->
@@ -36,9 +41,9 @@ class NoteVH(gla: GeneralListAdapter, itemView: View, parent: ViewGroup, val sho
             checkbox.isChecked = data.isDone()
         } else checkbox.visibility = View.GONE
 
-        checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
-            gla.sort()
-        }
+        checkbox.isEnabled = false
+//        checkbox.setOnCheckedChangeListener(checkboxChangeListener)
+
         trash.setOnClickListener {
             val index = gla.dataList.indexOf(data)
             gla.dataList.remove(data)
