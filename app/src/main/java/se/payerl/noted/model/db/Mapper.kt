@@ -3,8 +3,16 @@ package se.payerl.noted.model.db
 import se.payerl.noted.model.*
 
 class Mapper {
-    fun noteEntityToNote(note: NoteEntity): Note {
-        return Note(note.uuid, note.type, note.createdAt, note.parent, note.name)
+    fun noteEntityToNote(note: NoteEntity, db: AppDatabase): Note {
+        return Note(note.uuid, note.type, note.createdAt, note.parent, note.name).apply {
+            parent?.let { nonNullParent ->
+                db.queryExecutor.execute {
+                    db.mixedDao().getChildren(nonNullParent).map { child -> entityToBase(child, db) }.let { children ->
+                        content.addAll(children)
+                    }
+                }
+            }
+        }
     }
 
     fun noteToNoteEntity(note: Note): NoteEntity {
@@ -45,9 +53,9 @@ class Mapper {
         return NoteRowAmount(row.parent, row.content, row.amountWhenFinished, row.amount, row.uuid, row.type, row.createdAt)
     }
 
-    fun entityToBase(entity: Entity): NoteBase {
+    fun entityToBase(entity: Entity, db: AppDatabase): NoteBase {
         return when(entity.type) {
-            NoteType.LIST -> noteEntityToNote(entity as NoteEntity)
+            NoteType.LIST -> noteEntityToNote(entity as NoteEntity, db)
             NoteType.ROW_AMOUNT -> noteRowAmountEntityToNoteRowAmount(entity as NoteRowAmountEntity)
             NoteType.ROW_TEXT -> noteRowTextEntityToNoteRowText(entity as NoteRowTextEntity)
         }

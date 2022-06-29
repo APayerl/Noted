@@ -13,6 +13,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.selection.*
+import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -82,7 +83,7 @@ class ListViewFragment : Fragment() {
                         db.queryExecutor.execute {
                             var row: NoteBase? = null
                             tracker.selection.elementAt(0).let { uuid ->
-                                db.noteDao().findByUUID(uuid)?.let { note -> row = m.noteEntityToNote(note) }
+                                db.noteDao().findByUUID(uuid)?.let { note -> row = m.noteEntityToNote(note, db) }
                                 db.rowTextDao().findByUUID(uuid)?.let { note -> row = m.noteRowTextEntityToNoteRowText(note) }
                                 db.rowAmountDao().findByUUID(uuid)?.let { note -> row = m.noteRowAmountEntityToNoteRowAmount(note) }
                             }
@@ -191,7 +192,7 @@ class ListViewFragment : Fragment() {
             } else {
                 db.queryExecutor.execute {
                     db.noteDao().findByUUID(uuid)?.let {
-                        val note = m.noteEntityToNote(it)
+                        val note = m.noteEntityToNote(it, db)
                         setOnClickListener {
                             glAdapter.add(GeneralListAdapter.getRow(defaultType, note))
                         }
@@ -203,7 +204,7 @@ class ListViewFragment : Fragment() {
                                 NoteType.values().indexOf(defaultType)
                             ) { chosen ->
                                 if(NoteType.LIST.ordinal == chosen) {
-                                    openListDialog(uuid) { glAdapter.add(it) }
+                                    openListDialog(uuid) { note -> glAdapter.add(note) }
                                 } else glAdapter.add(GeneralListAdapter.getRow(
                                     NoteType.values()[chosen],
                                     note
@@ -264,9 +265,9 @@ class ListViewFragment : Fragment() {
         db.queryExecutor.execute {
             val list = mutableListOf<NoteBase>()
             if (uuid == null) {
-                list.addAll(db.noteDao().findRootLists().map { m.noteEntityToNote(it) })
+                list.addAll(db.noteDao().findRootLists().map { m.noteEntityToNote(it, db) })
             } else {
-                list.addAll(db.mixedDao().getChildren(uuid).map { m.entityToBase(it) })
+                list.addAll(db.mixedDao().getChildren(uuid).map { m.entityToBase(it, db) })
             }
 
             this@ListViewFragment.requireActivity().runOnUiThread {
